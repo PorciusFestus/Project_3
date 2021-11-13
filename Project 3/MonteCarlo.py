@@ -7,6 +7,12 @@ import numpy as np
 
 # *************** Main MonteCarlo Algorithm ****************
 
+# At this point, if you haven't started on this yet, there is still nothing stopping us from using
+# either python or java for this, so whichever you prefer. If you use Java, we can just import
+# data from a .csv file for analysis, etc. That's what I did for project 2 using R for analysis
+# instead of python (python does most everything R can do though, they are comparable for
+# analysis purposes)
+
 # 3) Model Analysis
 # OBJECTIVE 1: Gain an understanding of th drop error model.
 
@@ -40,44 +46,44 @@ plt.legend()
 plt.show()
 
 
-# 1.3 Graph of Three Circles TODO: this still needs a good bit of work, although the x_p values work
+# 1.3 Graph of Three Circles
 
 p = np.array([0.5, 0.7, 0.9])                   # the probabilities that will give the radii
-x_p_sq = -2 * np.log(-1*p + 1) / a ** 2         # the SQUARES of the radii for the three circles
+x_p = np.sqrt(-2 * np.log(-1*p + 1) / a ** 2)   # the radii for the three circles
 
 t = [0, 0]
 print('The values of x_p are:')
-print('for p = ' + str(p[0]) + ', x_p = ' + str(np.sqrt(x_p_sq[0])) + ' inches')
-print('for p = ' + str(p[1]) + ', x_p = ' + str(np.sqrt(x_p_sq[1])) + ' inches')
-print('for p = ' + str(p[2]) + ', x_p = ' + str(np.sqrt(x_p_sq[2])) + ' inches')
+print('for p = ' + str(p[0]) + ', x_p = ' + str(x_p[0]) + ' inches')
+print('for p = ' + str(p[1]) + ', x_p = ' + str(x_p[1]) + ' inches')
+print('for p = ' + str(p[2]) + ', x_p = ' + str(x_p[2]) + ' inches')
 
-x_coord = np.linspace(-1*np.floor(np.sqrt(x_p_sq[2])), np.ceil(np.sqrt(x_p_sq[2])), 1000)
-y_coord = np.linspace(-1*np.floor(np.sqrt(x_p_sq[2])), np.ceil(np.sqrt(x_p_sq[2])), 1000)
+theta = np.linspace(0, 2*np.pi, 100)
 
-X_coord, Y_coord = np.meshgrid(x_coord,y_coord)
+c1_x = x_p[0]*np.cos(theta)
+c1_y = x_p[0]*np.sin(theta)
 
-Circle_1 = X_coord**2 + Y_coord**2 - x_p_sq[0]
-Circle_2 = X_coord**2 + Y_coord**2 - x_p_sq[1]
-Circle_3 = X_coord**2 + Y_coord**2 - x_p_sq[2]
+c2_x = x_p[1]*np.cos(theta)
+c2_y = x_p[1]*np.sin(theta)
 
-fig, ax = plt.subplots()
+c3_x = x_p[2]*np.cos(theta)
+c3_y = x_p[2]*np.sin(theta)
 
-ax.contour(X_coord, Y_coord, Circle_1, [0], label='Landing Area within 50% certainty')
-ax.contour(X_coord, Y_coord, Circle_2, [0], label='Landing Area within 70% certainty')
-ax.contour(X_coord, Y_coord, Circle_3, [0], label='Landing Area within 90% certainty')
-# plt.plot(t[0], t[1], label='Origin', linewidth=5)                # The origin (point T)
+fig, ax = plt.subplots(1)
+
+ax.plot(c1_x, c1_y, label='Landing Area within 50% certainty')
+ax.plot(c2_x, c2_y, label='Landing Area within 70% certainty')
+ax.plot(c3_x, c3_y, label='Landing Area within 90% certainty')
+ax.plot(t[0], t[1], 'ro', label='Origin', linewidth=5)
 ax.set_aspect(1)
 
 plt.xlabel('East-West Distance')
 plt.ylabel('North-South Distance')
-plt.title('Landing Areas with Respective Probabilities', fontsize=8)
-plt.xlim(-1.1*np.floor(np.sqrt(x_p_sq[2])), 1.1*np.ceil(np.sqrt(x_p_sq[2])))
-plt.ylim(-1.1*np.floor(np.sqrt(x_p_sq[2])), 1.1*np.ceil(np.sqrt(x_p_sq[2])))
-# plt.legend()   <--- Does not seem to work with this plotting method
+plt.title('Landing Areas with Respective Probabilities', fontsize=12)
+plt.xlim(-175, 175)
+plt.ylim(-250, 150)
 plt.grid(linestyle='--')
-
-plt.savefig("plot_circle_matplotlib_03.png", bbox_inches='tight')
-
+plt.savefig("three_circles.png", bbox_inches='tight')
+plt.legend()
 plt.show()
 
 
