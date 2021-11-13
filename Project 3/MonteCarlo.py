@@ -43,8 +43,6 @@ plt.show()
 # 1.3 Graph of Three Circles TODO: this still needs a good bit of work, although the x_p values work
 
 p = np.array([0.5, 0.7, 0.9])                   # the probabilities that will give the radii
-x_vals = np.linspace(-130, 130, 1000)           # horizontal axis coordinates
-x2_vals = np.array([x_vals, x_vals])            # need to do each x val twice since graphing circles
 x_p_sq = -2 * np.log(-1*p + 1) / a ** 2         # the SQUARES of the radii for the three circles
 
 t = [0, 0]
@@ -53,32 +51,34 @@ print('for p = ' + str(p[0]) + ', x_p = ' + str(np.sqrt(x_p_sq[0])) + ' inches')
 print('for p = ' + str(p[1]) + ', x_p = ' + str(np.sqrt(x_p_sq[1])) + ' inches')
 print('for p = ' + str(p[2]) + ', x_p = ' + str(np.sqrt(x_p_sq[2])) + ' inches')
 
-# first circle:
-circle_1_neg = -1 * np.sqrt(x_p_sq[0] - x_vals ** 2)
-circle_1_pos = np.sqrt(x_p_sq[0] - x_vals ** 2)
-circle_1 = [circle_1_neg, circle_1_pos]
+x_coord = np.linspace(-1*np.floor(np.sqrt(x_p_sq[2])), np.ceil(np.sqrt(x_p_sq[2])), 1000)
+y_coord = np.linspace(-1*np.floor(np.sqrt(x_p_sq[2])), np.ceil(np.sqrt(x_p_sq[2])), 1000)
 
-# second circle:
-circle_2_neg = -1 * np.sqrt(x_p_sq[1] - x_vals ** 2)
-circle_2_pos = np.sqrt(x_p_sq[1] - x_vals ** 2)
-circle_2 = [circle_1_neg, circle_1_pos]
+X_coord, Y_coord = np.meshgrid(x_coord,y_coord)
 
-# third circle:
-circle_3_neg = -1 * np.sqrt(x_p_sq[2] - x_vals ** 2)
-circle_3_pos = np.sqrt(x_p_sq[2] - x_vals ** 2)
-circle_3 = [circle_1_neg, circle_1_pos]
+Circle_1 = X_coord**2 + Y_coord**2 - x_p_sq[0]
+Circle_2 = X_coord**2 + Y_coord**2 - x_p_sq[1]
+Circle_3 = X_coord**2 + Y_coord**2 - x_p_sq[2]
 
-# plot the circle and the point
+fig, ax = plt.subplots()
 
-plt.plot(x_vals, circle_1_pos, label='Landing Area within 50% certainty')  # The first circle
-plt.plot(x_vals, circle_2_pos, label='Landing Area within 70% certainty')  # The second circle
-plt.plot(x_vals, circle_3_pos, label='Landing Area within 90% certainty')  # The third circle
-plt.plot(t[0], t[1], label='Origin', linewidth=5)                      # The origin (point T)
+ax.contour(X_coord, Y_coord, Circle_1, [0], label='Landing Area within 50% certainty')
+ax.contour(X_coord, Y_coord, Circle_2, [0], label='Landing Area within 70% certainty')
+ax.contour(X_coord, Y_coord, Circle_3, [0], label='Landing Area within 90% certainty')
+# plt.plot(t[0], t[1], label='Origin', linewidth=5)                # The origin (point T)
+ax.set_aspect(1)
+
 plt.xlabel('East-West Distance')
 plt.ylabel('North-South Distance')
-plt.xlim(x2_vals.min()*1.1, x2_vals.max()*1.1)
-plt.ylim(x2_vals.min()*1.1, x2_vals.max()*1.1)
-plt.title("Landing Areas with Respective Probabilities")
-# plt.legend()
+plt.title('Landing Areas with Respective Probabilities', fontsize=8)
+plt.xlim(-1.1*np.floor(np.sqrt(x_p_sq[2])), 1.1*np.ceil(np.sqrt(x_p_sq[2])))
+plt.ylim(-1.1*np.floor(np.sqrt(x_p_sq[2])), 1.1*np.ceil(np.sqrt(x_p_sq[2])))
+# plt.legend()   <--- Does not seem to work with this plotting method
+plt.grid(linestyle='--')
+
+plt.savefig("plot_circle_matplotlib_03.png", bbox_inches='tight')
+
 plt.show()
+
+
 
