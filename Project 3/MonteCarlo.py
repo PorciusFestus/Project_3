@@ -173,7 +173,6 @@ for n in n_vec2:
     # Variables to store quantities for 5.3
     mean_var_n = []
     AD_n = []
-    MAD_n = []
 
 
     # Prepare samples (5.2.1)
@@ -184,7 +183,7 @@ for n in n_vec2:
     mean = sum(m_n)/K
     variance = sum(np.subtract(np.power(m_n, 2), mean**2)) / K
 
-    mean_var_n.append([mean, variance, mu_x, np.sqrt(var_x)/np.sqrt(n)])
+    mean_var_n.append([n, mean, variance, mu_x, np.sqrt(var_x)/np.sqrt(n)])
 
 
     # 5.2.2.2 transform the sample of M_n into a sample of the standardized random variable Z_n
@@ -194,7 +193,7 @@ for n in n_vec2:
     # 5.2.2.3 estimate from the sample of Z_n the probabilities of seven events
     z_j = [-1.4, -1.0, -0.5, 0, 1.0, 1.4]
 
-    AD_j = []
+    AD_j = [n]
     for j in range(0, 6) :
         # find percentage of z_n values less than or equal to z_j
         counter = 0
@@ -214,9 +213,8 @@ for n in n_vec2:
             MAD_y = MAD_j
             MAD_x = z_j[j]
             MAD_index = j
-
     AD_n.append(AD_j)
-    MAD_n.append(MAD_y)
+    AD_n.append(MAD_y)
 
     # 5.2.2.5 Draw a figure showing:
 
@@ -255,10 +253,15 @@ for n in n_vec2:
 
 # ii) a table comparing the estimates (mu_n, sigma_n) with the population values
 # (mu_x, sigma_x / sqrt(n) ) for every n.
+mean_var_n.insert(0, ['n','Sample Mean', 'Sample Standard Deviation', 'Population Mean',
+                        'Population Standard Deviation', 'MAD_n'])
 mean_var_df = pd.DataFrame(mean_var_n)
 mean_var_df.to_csv('mean_var.csv', index=False)
 
 # iii) a table reporting the absolute difference for every j and n, and the MAD for every n
+AD_n.insert(0, np.array(['n','Absolute Difference j = 1','Absolute Difference j = 2',
+             'Absolute Difference j = 3', 'Absolute Difference j = 4', 'Absolute Difference j = 5'
+             , 'Absolute Difference j = 6', 'Absolute Difference j = 7']))
 AD_df = pd.DataFrame(AD_n)
 AD_df.to_csv('AD_n.csv', index=False)
 
