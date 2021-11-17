@@ -124,6 +124,7 @@ for n in n_vec1:
         ordinate1.append(sample_mean(n))
 
 mu_x = 1/a * np.sqrt(np.pi/2)
+var_x = (4 - np.pi)/(2*a**2)
 
 ax.plot(abscissa1, ordinate1, label='M_n')
 ax.plot(abscissa1, mu_x, label='Population Mean')
@@ -165,7 +166,15 @@ for n in n_vec2:
     m_n = []
     z_n = []
     F_n = []
-    MAD = 0
+    MAD_x = 0
+    MAD_y = 0
+    MAD_index = 0
+
+    # Variables to store quantities for 5.3
+    mean_var_n = []
+    AD_n = []
+    MAD_n = []
+
 
     # Prepare samples (5.2.1)
     for k in k_vec:
@@ -175,6 +184,9 @@ for n in n_vec2:
     mean = sum(m_n)/K
     variance = sum(np.subtract(np.power(m_n, 2), mean**2)) / K
 
+    mean_var_n.append([mean, variance, mu_x, np.sqrt(var_x)/np.sqrt(n)])
+
+
     # 5.2.2.2 transform the sample of M_n into a sample of the standardized random variable Z_n
     z_n = np.divide(np.subtract(m_n, mean), variance)
     z_n_sorted = sorted(z_n)
@@ -182,6 +194,7 @@ for n in n_vec2:
     # 5.2.2.3 estimate from the sample of Z_n the probabilities of seven events
     z_j = [-1.4, -1.0, -0.5, 0, 1.0, 1.4]
 
+    AD_j = []
     for j in range(0, 6) :
         # find percentage of z_n values less than or equal to z_j
         counter = 0
@@ -195,40 +208,59 @@ for n in n_vec2:
 
         # 5.2.2.4 Evaluate the goodness-of-fit using the MAD
         MAD_j = abs(F_n[j] - NormalDist.cdf(z_j[j]))
+        AD_j.append(MAD_j)
 
-        if MAD_j > MAD:
-            MAD = MAD_j
+        if MAD_j > MAD_y:
+            MAD_y = MAD_j
+            MAD_x = z_j[j]
+            MAD_index = j
+
+    AD_n.append(AD_j)
+    MAD_n.append(MAD_y)
 
     # 5.2.2.5 Draw a figure showing:
 
     # i) the seven points {(z_j, F_n(z_j)) : j = 1, ... ,7}
-    ax.plot(z_j, F_n, label='F_n(z_j)')
+    ax.scatter(z_j, F_n, label='F_n(z_j)')
 
     # ii) The standard normal cdf phi
     ax.plot(phi_abscissa, phi, label='Phi(z)')
 
     # iii) The MAD as a highlighted interval of probability (ordinate at point z_j at which it
     # occurs (abscissa)
-    ax.plot(abscissa1, ordinate1, label='M_n')
+    plt.vlines(x=MAD_x, ymin=min(NormalDist.cdf(MAD_x), F_n[MAD_index]),
+               ymax=max(NormalDist.cdf(MAD_x), F_n[MAD_index]), colors='purple', label='MAD_n')
 
     # And make it look nice :)
     plt.xlabel('Z')
-    plt.ylabel('Probability')
-    plt.title('Landing Areas with Respective Probabilities', fontsize=12)
+    plt.ylabel('Cumulative Probability')
+    nameString = 'Graph_of_Fn-n' + str(n) + '.png'
+    plt.title(nameString, fontsize=12)
     # plt.xlim(-175, 175)
     # plt.ylim(-250, 150)
     plt.grid(linestyle='--')
     plt.legend()
-    plt.savefig("M_n.png", bbox_inches='tight')
+    plt.savefig(nameString, bbox_inches='tight')
     plt.show()
-
-
-
 
 
 # 5.3) Summarize Results [might require further graphing and calculations, might not]
 # NOTE: LaTeX will read from a .csv file, so we probably want the code to output tabular results
 # as .csv files which we can then read directly instead of typing out the tables by hand,
 # which can be somewhat tedious, especially for large tables.
+
+# The data were collected in previous areas of the code, so now we need only export it to a .csv
+
+# i) is the already saved graphs
+
+# ii) a table comparing the estimates (mu_n, sigma_n) with the population values
+# (mu_x, sigma_x / sqrt(n) ) for every n.
+mean_var_df = pd.DataFrame(mean_var_n)
+mean_var_df.to_csv('mean_var.csv', index=False)
+
+# iii) a table reporting the absolute difference for every j and n, and the MAD for every n
+AD_df = pd.DataFrame(AD_n)
+AD_df.to_csv('AD_n.csv', index=False)
+
 
 # 5.4) and 5.5) should be strictly report.
