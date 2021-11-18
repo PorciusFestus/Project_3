@@ -92,11 +92,37 @@ plt.show()
 # 4.2) Experiment
 
 # 4.2.1) Design a Monte-Carlo simulation algorithm
-# TODO: Bruce
 
-def monte_carlo(*args):
-    pass
+x_0 = 1000
+a = 24693
+c = 3967
+K = 2**18
 
+
+def getnextnum():
+    global x_0
+    x_0 = (a*x_0+c) % K
+    return x_0/K
+
+
+def find_x(num):
+    return np.sqrt(-2*np.log(1-num))/57
+
+
+random_nums = []
+monte_carlo = []
+for i in range(1000):
+    random_nums.append(round(getnextnum(), 4))
+    monte_carlo.append(round(find_x(random_nums[i]), 4))
+
+print("Values of u_1, u_2, and u_3:")
+print(random_nums[0])
+print(random_nums[1])
+print(random_nums[2])
+print("Values of u_51, u_52, and u_53:")
+print(random_nums[52])
+print(random_nums[53])
+print(random_nums[54])
 
 # 4.2.2) Simulate the outcomes of many deliveries of newspaper via a drone by generating
 # independent realizations of X
@@ -113,13 +139,13 @@ ordinate1 = []
 def sample_mean(count):
     x_vec = []
     for i in range(1, count):
-        x_vec.append(monte_carlo(i))
+        x_vec.append(monte_carlo[i])
 
     return sum(x_vec) / count
 
 
 for n in n_vec1:
-    for index in range(1, 110):
+    for index in range(110):
         abscissa1.append(n)
         ordinate1.append(sample_mean(n))
 
