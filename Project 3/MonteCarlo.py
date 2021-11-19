@@ -83,7 +83,6 @@ plt.legend()
 plt.savefig("three_circles.png", bbox_inches='tight')
 plt.show()
 
-
 # 4) LAWS OF LARGE NUMBERS
 
 # OBJECTIVE 2: Demonstrate empirically the convergence of the sample mean to the population mean,
@@ -99,22 +98,23 @@ plt.show()
 x_0 = 1000
 a_q = 24693
 c_q = 3967
-K_q = 2**18
+K_q = 2 ** 18
+
 
 # Random Number generator
 
 
-def nextRandom():
+def next_random():
     global x_0
-    x_0 = (a_q*x_0+c_q) % K_q
-    return x_0/K_q
+    x_0 = (a_q * x_0 + c_q) % K_q
+    return x_0 / K_q
 
 
 # inverse cdf of x function
 
 
 def inv_cdf_x(num):
-    return np.sqrt(-2*np.log(1-num))/a
+    return np.sqrt(-2 * np.log(1 - num)) / a
 
 
 # Monte Carlo Simulation function. Returns a list with n realizations of X.
@@ -123,7 +123,7 @@ def inv_cdf_x(num):
 def monte_carlo(n):
     realizations = []
     for i in range(n):
-        realizations.append(inv_cdf_x(nextRandom()))
+        realizations.append(inv_cdf_x(next_random()))
 
     return realizations
 
@@ -133,7 +133,7 @@ def monte_carlo(n):
 random_nums = []
 
 for i in range(1, 55):
-    random_nums.append(round(nextRandom(), 4))
+    random_nums.append(round(next_random(), 4))
 
 print("Values of u_1, u_2, and u_3:")
 print(random_nums[0])
@@ -165,9 +165,9 @@ for n in n_vec1:
         abscissa1.append(n)
         ordinate1.append(sample_mean(n))
 
-mu_x = 1/a * np.sqrt(np.pi/2)
+mu_x = 1 / a * np.sqrt(np.pi / 2)
 mu_x_vec = np.full((770,), mu_x)
-var_x = (4 - np.pi)/(2*a**2)
+var_x = (4 - np.pi) / (2 * a ** 2)
 
 fig, ax0 = plt.subplots(1)
 
@@ -199,6 +199,7 @@ plt.show()
 
 K = 550
 
+# construct the standard normal cdf and vectors for graphing it.
 normal = NormalDist()
 phi_abscissa = np.linspace(-2.5, 2.5, K)
 phi = []
@@ -208,6 +209,7 @@ for phi_i in phi_abscissa:
 # Variables to store quantities for 5.3
 mean_var_n = []
 AD_n = []
+
 n_index = 1
 
 for n in [5, 10, 15, 30]:
@@ -225,29 +227,26 @@ for n in [5, 10, 15, 30]:
         m_n.append(sample_mean(n))
 
     # 5.2.2.1) calculate the estimates of the mean and variance of M_n
-    mean = sum(m_n)/K
-    variance = sum(np.subtract(np.power(m_n, 2), mean**2)) / K
+    mean = np.sum(m_n) / K
+    variance = np.sum(np.subtract(np.power(m_n, 2), mean ** 2)) / K
 
-    mean_var_n.append([n, mean, variance, mu_x, np.sqrt(var_x)/np.sqrt(n)])
+    mean_var_n.append([n, mean, variance, mu_x, np.sqrt(var_x) / np.sqrt(n)])
 
     # 5.2.2.2) transform the sample of M_n into a sample of the standardized random variable Z_n
-    z_n = np.divide(np.subtract(m_n, mean), variance)
-    z_n_sorted = sorted(z_n)
+    z_n = np.divide(np.subtract(m_n, mean), np.sqrt(variance))
 
     # 5.2.2.3) estimate from the sample of Z_n the probabilities of seven events
-    z_j = [-1.4, -1.0, -0.5, 0, 1.0, 1.4]
+    z_j = [-1.4, -1.0, -0.5, 0, 0.5, 1.0, 1.4]
 
     AD_j = [n]
-    for j in range(0, 6) :
+    for j in range(7):
         # find percentage of z_n values less than or equal to z_j
         counter = 0
-        for z in z_n_sorted:
+        for z in z_n:
             if z <= z_j[j]:
                 counter += 1
-            else:
-                break
 
-        F_n.append(counter/K)
+        F_n.append(counter / K)
 
         # 5.2.2.4) Evaluate the goodness-of-fit using the MAD
         MAD_j = abs(F_n[j] - normal.cdf(z_j[j]))
@@ -289,9 +288,9 @@ for n in [5, 10, 15, 30]:
     n_index += 1
 
 plt.show()
-plt.savefig('5.3_Graph_Panel.png', bbox_inches='tight')
+# plt.savefig('5.3_Graph_Panel.png', bbox_inches='tight')
 
-# 5.3) Summarize Results [might require further graphing and calculations, might not]
+# 5.3) Summarize Results
 # NOTE: LaTeX will read from a .csv file, so we probably want the code to output tabular results
 # as .csv files which we can then read directly instead of typing out the tables by hand,
 # which can be somewhat tedious, especially for large tables.
@@ -303,16 +302,16 @@ plt.savefig('5.3_Graph_Panel.png', bbox_inches='tight')
 # ii) a table comparing the estimates (mu_n, sigma_n) with the population values
 # (mu_x, sigma_x / sqrt(n) ) for every n.
 mean_var_n.insert(0, ['n', 'Sample Mean', 'Sample Standard Deviation', 'Population Mean',
-                        'Population Standard Deviation'])
+                      'Population Standard Deviation'])
 mean_var_df = pd.DataFrame(mean_var_n)
 mean_var_df.to_csv('mean_var.csv', index=False)
 
 # iii) a table reporting the absolute difference for every j and n, and the MAD for every n
 AD_n.insert(0, np.array(['n', 'Absolute Difference j = 1', 'Absolute Difference j = 2',
-             'Absolute Difference j = 3', 'Absolute Difference j = 4', 'Absolute Difference j = 5'
-             , 'Absolute Difference j = 6', 'Absolute Difference j = 7', 'MAD_n']))
+                         'Absolute Difference j = 3', 'Absolute Difference j = 4',
+                         'Absolute Difference j = 5', 'Absolute Difference j = 6',
+                         'Absolute Difference j = 7', 'MAD_n']))
 AD_df = pd.DataFrame(AD_n)
 AD_df.to_csv('AD_n.csv', index=False)
-
 
 # 5.4) and 5.5) should be strictly report.
