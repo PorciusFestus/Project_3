@@ -288,6 +288,7 @@ for n in [5, 10, 15, 30]:
     n_index += 1
 
 plt.show()
+
 # plt.savefig('5.3_Graph_Panel.png', bbox_inches='tight')
 
 # 5.3) Summarize Results
