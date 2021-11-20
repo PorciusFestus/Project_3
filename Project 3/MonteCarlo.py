@@ -21,7 +21,7 @@ x = np.linspace(0, 350, 1000)  # Axes Values
 
 pdf = a ** 2 * x * np.e ** (-.5 * a ** 2 * x ** 2)
 plt.plot(x, pdf, label='f_X (x)')  # Plot some data on the (implicit) axes.
-plt.xlabel('Drop Distance x')
+plt.xlabel('Drop Distance x (inches)')
 plt.ylabel('Probability Density')
 plt.xlim(0, x.max() * 1.1)
 plt.ylim(0, pdf.max() * 1.1)
@@ -34,7 +34,7 @@ plt.show()
 
 cdf = 1 - np.e ** (-.5 * a ** 2 * x ** 2)
 plt.plot(x, cdf, label='F_X (x)')  # Plot some data on the (implicit) axes.
-plt.xlabel('Drop Distance x')
+plt.xlabel('Drop Distance x (inches)')
 plt.ylabel('Cumulative Probability')
 plt.xlim(0, x.max() * 1.1)
 plt.ylim(0, 1)
@@ -171,13 +171,12 @@ var_x = (4 - np.pi) / (2 * a ** 2)
 
 fig, ax0 = plt.subplots(1)
 
-ax0.plot([1, 2, 3], [1, 2, 3], label='test')
-ax0.plot(abscissa1, ordinate1, label='M_n')
+ax0.plot(abscissa1, ordinate1, 'ro', label='M_n')
 ax0.plot(abscissa1, mu_x_vec, label='Population Mean')
 
 plt.xlabel('Sample Size (n)')
 plt.ylabel('Sample Mean (M_n)')
-plt.title('n vs the Sample Mean', fontsize=12)
+plt.title('Sample Mean vs n', fontsize=12)
 # plt.xlim(-175, 175)
 # plt.ylim(-250, 150)
 plt.grid(linestyle='--')
@@ -187,6 +186,7 @@ plt.show()
 
 # 4.2.5,6,7 may not require any coding, but if they do, they can go here.
 
+# 4.2.7 TODO: do this thing!
 
 # 5) CENTRAL LIMIT THEOREM
 
@@ -209,10 +209,12 @@ for phi_i in phi_abscissa:
 # Variables to store quantities for 5.3
 mean_var_n = []
 AD_n = []
+n_vec2 = np.array([5, 10, 15, 30])
+
 
 n_index = 1
 
-for n in [5, 10, 15, 30]:
+for n in n_vec2:
     abscissa2 = []
     ordinate2 = []
     m_n = []
@@ -223,24 +225,24 @@ for n in [5, 10, 15, 30]:
     MAD_index = 0
 
     # Prepare samples (5.2.1)
-    for k in range(1, K):
+    for k in range(K):
         m_n.append(sample_mean(n))
 
     # 5.2.2.1) calculate the estimates of the mean and variance of M_n
     mean = np.sum(m_n) / K
     variance = np.sum(np.subtract(np.power(m_n, 2), mean ** 2)) / K
 
-    mean_var_n.append([n, mean, variance, mu_x, np.sqrt(var_x) / np.sqrt(n)])
+    mean_var_n.append(np.round([n, mean, np.sqrt(variance), mu_x, np.sqrt(var_x) / np.sqrt(n)], 4))
 
     # 5.2.2.2) transform the sample of M_n into a sample of the standardized random variable Z_n
     z_n = np.divide(np.subtract(m_n, mean), np.sqrt(variance))
 
     # 5.2.2.3) estimate from the sample of Z_n the probabilities of seven events
-    z_j = [-1.4, -1.0, -0.5, 0, 0.5, 1.0, 1.4]
+    z_j = np.array([-1.4, -1.0, -0.5, 0, 0.5, 1.0, 1.4])
 
     AD_j = [n]
-    for j in range(7):
-        # find percentage of z_n values less than or equal to z_j
+    for j in range(z_j.size):
+        # find proportion of z_n values less than or equal to z_j
         counter = 0
         for z in z_n:
             if z <= z_j[j]:
@@ -256,15 +258,15 @@ for n in [5, 10, 15, 30]:
             MAD_y = MAD_j
             MAD_x = z_j[j]
             MAD_index = j
-    AD_j.append(MAD_y)
-    AD_n.append(AD_j)
+    AD_j.append(np.round(MAD_y, 4))
+    AD_n.append(np.round(AD_j, 4))
 
     # 5.2.2.5) Draw a figure showing:
 
-    plt.subplot(2, 2, n_index)
+    plt.subplot(np.ceil(np.sqrt(n_vec2.size)), np.ceil(np.sqrt(n_vec2.size)), n_index)
 
     # i) the seven points {(z_j, F_n(z_j)) : j = 1, ... ,7}
-    plt.scatter(z_j, F_n, label='F_n(z_j)')
+    plt.scatter(z_j, F_n, label='F_n(z_j)', color='cyan', linewidth=0.25 )
 
     # ii) The standard normal cdf phi
     plt.plot(phi_abscissa, phi, label='Phi(z)')
@@ -272,7 +274,7 @@ for n in [5, 10, 15, 30]:
     # iii) The MAD as a highlighted interval of probability (ordinate at point z_j at which it
     # occurs (abscissa)
     plt.vlines(x=MAD_x, ymin=min(normal.cdf(MAD_x), F_n[MAD_index]),
-               ymax=max(normal.cdf(MAD_x), F_n[MAD_index]), colors='purple', label='MAD_n')
+               ymax=max(normal.cdf(MAD_x), F_n[MAD_index]), colors='red', label='MAD_n')
 
     # And make it look nice :)
     plt.xlabel('Z')
@@ -302,17 +304,20 @@ plt.show()
 
 # ii) a table comparing the estimates (mu_n, sigma_n) with the population values
 # (mu_x, sigma_x / sqrt(n) ) for every n.
+
 mean_var_n.insert(0, ['n', 'Sample Mean', 'Sample Standard Deviation', 'Population Mean',
                       'Population Standard Deviation'])
 mean_var_df = pd.DataFrame(mean_var_n)
+# mean_var_df.drop(index=mean_var_df.index[0], axis=0, inplace=True)
 mean_var_df.to_csv('mean_var.csv', index=False)
 
 # iii) a table reporting the absolute difference for every j and n, and the MAD for every n
-AD_n.insert(0, np.array(['n', 'Absolute Difference j = 1', 'Absolute Difference j = 2',
-                         'Absolute Difference j = 3', 'Absolute Difference j = 4',
-                         'Absolute Difference j = 5', 'Absolute Difference j = 6',
-                         'Absolute Difference j = 7', 'MAD_n']))
+AD_n.insert(0, np.array(['n', 'AD j = 1', 'AD j = 2',
+                         'AD j = 3', 'AD j = 4',
+                         'AD j = 5', 'AD j = 6',
+                         'AD j = 7', 'MAD_n']))
 AD_df = pd.DataFrame(AD_n)
+# AD_df.drop(index=AD_df.index[0], axis=0, inplace=True)
 AD_df.to_csv('AD_n.csv', index=False)
 
 # 5.4) and 5.5) should be strictly report.
